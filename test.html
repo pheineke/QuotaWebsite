@@ -18,8 +18,12 @@
                     // Tabelle mit der Klasse "greyBox" finden
                     var $table = $html.find("table.greyBox");
 
-                    // Tabelle auf der Seite anzeigen
-                    $("body").append($table);
+                    // Tabellenzeilen und Spalten extrahieren
+                    $table.find("tr").each(function() {
+                        $(this).find("td").each(function() {
+                            $("body").append("<p>" + $(this).text() + "</p>");
+                        });
+                    });
                 }
             });
         });

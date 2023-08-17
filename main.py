@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import scrolledtext
 import requests
 from bs4 import BeautifulSoup
+from functools import reduce
+
 
 def get_table_content(url):
     response = requests.get(url)
@@ -20,7 +22,11 @@ def get_table_content(url):
     else:
         table_content = "Keine Tabelle gefunden."
     return table_content
-
+ 
+def remove_duplicates(input_str):
+    words = input_str.split()
+    unique_words = reduce(lambda x, y: x if y in x else x + [y], [[], ] + words)
+    return ' '.join(unique_words)
 
 # Tkinter GUI
 root = tk.Tk()
@@ -31,8 +37,9 @@ text_widget.pack(fill=tk.BOTH, expand=True)
 
 url = "https://quota.wohnheim.uni-kl.de/"
 table_content = get_table_content(url)
+table_content = remove_duplicates(table_content)
 text_widget.insert(tk.END, table_content)
 
-print(table_content)
+
 
 root.mainloop()
