@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tabelle extrahieren</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // URL der Website
+            var url = "https://quota.wohnheim.uni-kl.de/";
+
+            // AJAX-Anfrage an die Website senden
+            $.ajax({
+                url: url,
+                success: function(html) {
+                    // HTML-Text in ein jQuery-Objekt konvertieren
+                    var $html = $(html);
+
+                    // Tabelle mit der Klasse "greyBox" finden
+                    var $table = $html.find("table.greyBox");
+
+                    // Tabelle auf der Seite anzeigen
+                    $("body").append($table);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
