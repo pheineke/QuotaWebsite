@@ -1,42 +1,32 @@
+import tkinter as tk
+from tkinter import scrolledtext
 import requests
 from bs4 import BeautifulSoup
-import tkinter as tk
 
-# URL der Website
-url = "https://quota.wohnheim.uni-kl.de/"
+def get_table_content(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    table = soup.find('table')
+    if table:
+        rows = table.find_all('tr')
+        table_content = "\n".join([row.get_text(strip=True) for row in rows])
+        table_content = table_content.replace("Quotierungszeitraum:", "\nQuotierungszeitraum:")
+        table_content = table_content.replace("Download:", "\nDownload:")
+        table_content = table_content.replace("Upload:", "\nUpload:")
+        table_content = table_content.replace("Stand der Datenbank:", "\nStand der Datenbank:")
+    else:
+        table_content = "Keine Tabelle gefunden."
+    return table_content
 
-# HTML-Text der Website abrufen
-response = requests.get(url)
-html = response.text
-
-# BeautifulSoup-Objekt erstellen
-soup = BeautifulSoup(html, "html.parser")
-
-# Tabelle mit der Klasse "greyBox" finden
-table = soup.find("table", {"class": "greyBox"})
-
-# Tabellenzeilen und Spalten extrahieren
-rows = table.find_all("tr")
-data = []
-for row in rows:
-    cols = row.find_all("td")
-    row_data = []
-    for col in cols:
-        row_data.append(col.text.strip())
-    data.append(row_data)
-
-
-# Tkinter-Fenster erstellen
+# Tkinter GUI
 root = tk.Tk()
-root.title("Tabelle extrahieren")
+root.title("Inhalt der gescrapten Tabelle von Website")
 
-# Textfeld erstellen
-text = tk.Text(root)
-text.pack()
+text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD)
+text_widget.pack(fill=tk.BOTH, expand=True)
 
-# Daten in Textfeld einfügen
-for row in data:
-    text.insert(tk.END, "\t".join(row) + "\n")
+url = "https://quota.wohnheim.uni-kl.de/"
+table_content = get_table_content(url)
+text_widget.insert(tk.END, table_content)
 
-# Fenster öffnen
 root.mainloop()
