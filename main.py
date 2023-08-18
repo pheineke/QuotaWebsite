@@ -1,11 +1,13 @@
 import tkinter as tk
-from tkinter import scrolledtext, colorchooser, ttk
+from tkinter import scrolledtext, colorchooser
 import requests
 from bs4 import BeautifulSoup
+from functools import reduce
+import re
 
 def remove_duplicates(input_str):
     words = input_str.split(" ")
-    unique_words = list(set(words))
+    unique_words = reduce(lambda x, y: x if y in x else x + [y], [[], ] + words)
     return ' '.join(unique_words)
 
 def get_table_content(url):
@@ -34,68 +36,91 @@ def get_table_content(url):
 
         for old, new in replacements:
             table_content = table_content.replace(old, new)
+        
 
-        size_parts = [part for part in table_content.split() if "MiB" in part or "GiB" in part]
+        tbl = table_content.split("0%")
+        tbl[1].replace("|  Download:    ", "")
+        tbl[1].replace("|  Upload:    ", "")
+        tbl[1] = "\n" + tbl[1]
+        table_content = tbl[0] + tbl[1][32:]
 
-        download_size_parts = [part for part in size_parts if "Download:" in part]
-        upload_size_parts = [part for part in size_parts if "Upload:" in part]
+        tabless = table_content.split("!")
+        table_content = tabless[0] + tabless[1]
+
+        index = table_content.find("Download")
+        index = (table_content[index:])[:31].replace("Download:    ", "")
+
+        #Maximum Quota:
+        if "MiB" in index[11:]:
+            maxnumber = re.findall(r'\d+\.\d+|\d+', index)[0]
+            print("MiB")
+            print(maxnumber)
+        elif "GiB" in index[11:]:
+            maxnumber = re.findall(r'\d+\.\d+|\d+', index)[0]
+            print("GiB")
+            print(maxnumber)
 
 
-        download_size_total = 0
-        download_size_current = 0
-        for part in download_size_parts:
-            if "GiB" in part:
-                download_size_total += float(part.replace("GiB", "").replace(",", ".")) * 1024
-            elif "MiB" in part:
-                download_size_current += float(part.replace("MiB", "").replace(",", "."))
+        #Current Quota:
+        ##Download:
+        if "MiB" in index[11:]:
+            downloadnumber = re.findall(r'\d+\.\d+|\d+', index)[0]
+            print("MiB")
+            print(downloadnumber)
+        elif "GiB" in index[11:]:
+            downloadnumber = re.findall(r'\d+\.\d+|\d+', index)[0]
+            print("GiB")
+            print(downloadnumber)
 
-        upload_size_total = 0
-        upload_size_current = 0
-        for part in upload_size_parts:
-            if "GiB/s" in part:
-                upload_size_total += float(part.replace("GiB/s", "").replace(",", ".")) * 1024
-            elif "MiB/s" in part:
-                upload_size_current += float(part.replace("MiB/s", "").replace(",", "."))
+        
 
-        if download_size_total == 0:
-            download_percentage = 0
-        else:
-            download_percentage = (download_size_current / download_size_total) * 100
+        ##Upload:
+        index1 = table_content.find("Upload")
+        index1 = (table_content[index1:])[:31].replace("Upload:    ", "")
 
-        if upload_size_total == 0:
-            upload_percentage = 0
-        else:
-            upload_percentage = (upload_size_current / upload_size_total) * 100
+        if "MiB" in index[11:]:
+            uploadnumber = re.findall(r'\d+\.\d+|\d+', index)[0]
+            print("MiB")
+            print(uploadnumber)
+        elif "GiB" in index[11:]:
+            uploadnumber = re.findall(r'\d+\.\d+|\d+', index)[0]
+            print("GiB")
+            print(uploadnumber)
+        '''
+        index2 = table_content.find("von ")
+        index2 = (table_content[index2:])
 
-        return [download_percentage, upload_percentage]
+        
+        
+        maxnumber = re.findall(r'\d+\.\d+|\d+', index2)[0]
+        '''
+        #numbers = [float(s) for s in table_content.split() if s.isdigit()]
+        print(index)
+        print(index1)
 
-class App:
-    def __init__(self):
-        self.window = tk.Tk()
-        self.window.title("Internet Usage")
+    else:
+        table_content = "Keine Tabelle gefunden."
+    return table_content
+ 
 
-        self.download_label = tk.Label(self.window, text="Download")
-        self.download_label.grid(column=0, row=0)
 
-        self.download_progressbar = ttk.Progressbar(self.window, orient="horizontal", length=200, mode="determinate")
-        self.download_progressbar.grid(column=1, row=0)
+root = tk.Tk()
+root.title("Wohnheim - Quota")
 
-        self.upload_label = tk.Label(self.window, text="Upload")
-        self.upload_label.grid(column=0, row=1)
+text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD, bg="black", fg="white")
+text_widget.pack(fill=tk.BOTH, expand=True)
 
-        self.upload_progressbar = ttk.Progressbar(self.window, orient="horizontal", length=200, mode="determinate")
-        self.upload_progressbar.grid(column=1, row=1)
+url = "https://quota.wohnheim.uni-kl.de/"
+table_content = get_table_content(url)
+text_widget.insert(tk.END, table_content)
 
-        self.update_progressbars()
+# Zentrieren des Texts
+text_widget.tag_configure("center", justify="center")
+text_widget.tag_add("center", 1.0, "end")
 
-        self.window.mainloop()
+# Anpassen des Fensters an die Inhaltsgröße
+content_width = max([len(line) for line in table_content.split("\n")])
+content_height = len(table_content.split("\n"))
+root.geometry(f"{content_width * 10}x{content_height * 20}")
 
-    def update_progressbars(self):
-        progress_values = get_table_content("https://quota.wohnheim.uni-kl.de/")
-        if progress_values:
-            download_percentage, upload_percentage = progress_values
-            self.download_progressbar["value"] = download_percentage
-            self.upload_progressbar["value"] = upload_percentage
-        self.window.after(10000, self.update_progressbars)
-
-app = App()
+root.mainloop()
