@@ -19,19 +19,22 @@ def get_table_content(url):
 
         table_content = table_content.replace("\n", "")
 
-        table_content = table_content.replace("Quotierungszeitraum:", "\nQuotierungszeitraum:\n")
-        table_content = table_content.replace("zugewiesene IP:", "\nzugewiesene IP:\n")
-        table_content = table_content.replace("(", "\n(")
-        table_content = table_content.replace("VerbrauchLimit", "\nVerbrauch Limit\n")
-        table_content = table_content.replace("Download:", "|  Download:    ")
-        table_content = table_content.replace("Upload:", "|    Upload:    ")
-        table_content = table_content.replace("30 GiB", " von 30 GiB\n")
-        table_content = table_content.replace("B0%", "B\n")
-        table_content = table_content.replace("100%", "\n")
-        table_content = table_content.replace("Stand der Datenbank:\n", "\nStand der Datenbank:\n")
-        table_content = table_content.replace("Quotierungszeit:", "\nQuotierungszeit:\n")
-        table_content = table_content.replace("Stand der Datenbank:", "Stand der Datenbank:\n")
-        table_content = table_content.replace("Status wird nicht in Echtzeit aktualisiert!", "\n\nStatus wird nicht in Echtzeit aktualisiert!\n")
+        replacements = [("Quotierungszeitraum:", "\nQuotierungszeitraum:\n"),
+                ("zugewiesene IP:", "\nzugewiesene IP:\n"),
+                ("(", "\n("),
+                ("VerbrauchLimit", "\nVerbrauch Limit\n"),
+                ("Download:", "|  Download:    "),
+                ("Upload:", "|    Upload:    "),
+                ("30 GiB", " von 30 GiB\n"),
+                ("B0%", "B\n"),
+                ("100%", "\n"),
+                ("Stand der Datenbank:\n", "\nStand der Datenbank:\n"),
+                ("Quotierungszeit:", "\nQuotierungszeit:\n"),
+                ("Stand der Datenbank:", "Stand der Datenbank:\n"),
+                ("Status wird nicht in Echtzeit aktualisiert!", "\n\nStatus wird nicht in Echtzeit aktualisiert!\n")]
+
+        for old, new in replacements:
+            table_content = table_content.replace(old, new)
         
 
         tbl = table_content.split("0%")
