@@ -52,30 +52,11 @@ def get_table_content(url):
  
 
 
-# Tkinter GUI
-def change_colors():
-    bg_color = colorchooser.askcolor()[1]
-    text_widget.config(bg=bg_color)
-    
-    fg_color = get_complementary_color(bg_color)
-    text_widget.config(fg=fg_color)
-
-def get_complementary_color(hex_color):
-    hex_color = hex_color.lstrip("#")
-    rgb_color = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-    inverted_rgb = tuple(max(255 - value, 0) for value in rgb_color)
-    complementary_color = '#%02x%02x%02x' % inverted_rgb
-    return complementary_color
-
 root = tk.Tk()
 root.title("Wohnheim - Quota")
 
-text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD)
+text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD, bg="black", fg="white")
 text_widget.pack(fill=tk.BOTH, expand=True)
-
-
-color_button = tk.Button(root, text="Farbe auswählen", command=change_colors)
-color_button.pack(side="left", padx=5, pady=5)
 
 url = "https://quota.wohnheim.uni-kl.de/"
 table_content = get_table_content(url)
