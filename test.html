@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tabelle extrahieren</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // URL der Website
-            var url = "https://quota.wohnheim.uni-kl.de/";
-
-            // AJAX-Anfrage an die Website senden
-            $.ajax({
-                url: url,
-                success: function(html) {
-                    // HTML-Text in ein jQuery-Objekt konvertieren
-                    var $html = $(html);
-
-                    // Tabelle mit der Klasse "greyBox" finden
-                    var $table = $html.find("table.greyBox");
-
-                    // Tabellenzeilen und Spalten extrahieren
-                    $table.find("tr").each(function() {
-                        $(this).find("td").each(function() {
-                            $("body").append("<p>" + $(this).text() + "</p>");
-                        });
-                    });
-                }
-            });
-        });
-    </script>
+    <title>Quota Tabelle</title>
 </head>
 <body>
+    <div class="greyBox" id="tableContainer"></div>
+    
+    <script>
+        // Erstelle eine XMLHTTPRequest, um die Seite abzurufen
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://quota.wohnheim.uni-kl.de/", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                // Extrahiere den Inhalt der Seite
+                var pageContent = xhr.responseText;
+
+                // Erstelle ein temporäres HTML-Element, um den Inhalt zu analysieren
+                var tempElement = document.createElement('div');
+                tempElement.innerHTML = pageContent;
+
+                // Finde das Element mit der Klasse "greyBox"
+                var tableElement = tempElement.querySelector('.greyBox');
+
+                // Füge das gefundene Element zum "tableContainer" hinzu
+                var tableContainer = document.getElementById('tableContainer');
+                tableContainer.appendChild(tableElement);
+            }
+        };
+        xhr.send();
+    </script>
 </body>
 </html>

@@ -16,28 +16,33 @@ def get_table_content(url):
     if table:
         rows = table.find_all('tr')
         table_content = "\n".join([row.get_text(strip=True) for row in rows])
-        table_content = remove_duplicates(table_content)
+
+        table_content = table_content.replace("\n", "")
+
         table_content = table_content.replace("Quotierungszeitraum:", "\nQuotierungszeitraum:\n")
         table_content = table_content.replace("zugewiesene IP:", "\nzugewiesene IP:\n")
         table_content = table_content.replace("(", "\n(")
-        table_content = table_content.replace("VerbrauchLimit", "\nVerbrauch Limit")
-        
-        table_content = table_content.replace("Download:", "\nDownload:   ")
-        
-        table_content = table_content.replace("Upload:", "\nUpload:   ")
-
-        table_content = table_content.replace("MiB", "MiB\n")
-        table_content = table_content.replace("GiB", "GiB\n")
+        table_content = table_content.replace("VerbrauchLimit", "\nVerbrauch Limit\n")
+        table_content = table_content.replace("Download:", "|  Download:    ")
+        table_content = table_content.replace("Upload:", "|    Upload:    ")
+        table_content = table_content.replace("30 GiB", " von 30 GiB\n")
+        table_content = table_content.replace("B0%", "B\n")
+        table_content = table_content.replace("100%", "\n")
         table_content = table_content.replace("Stand der Datenbank:\n", "\nStand der Datenbank:\n")
         table_content = table_content.replace("Quotierungszeit:", "\nQuotierungszeit:\n")
         table_content = table_content.replace("Stand der Datenbank:", "Stand der Datenbank:\n")
-        table_content = table_content.replace("Status wird nicht in Echtzeit aktualisiert!", "\nStatus wird nicht in Echtzeit aktualisiert!\n")
-
-
-        #index = table_content.index("sein!") + (len("sein!")+1)
-        #table_content = table_content[index:].strip()
+        table_content = table_content.replace("Status wird nicht in Echtzeit aktualisiert!", "\n\nStatus wird nicht in Echtzeit aktualisiert!\n")
         
-        #table_content = remove_duplicates(table_content)
+
+        tbl = table_content.split("0%")
+        tbl[1].replace("|  Download:    ", "")
+        tbl[1].replace("|  Upload:    ", "")
+        tbl[1] = "\n" + tbl[1]
+        table_content = tbl[0] + tbl[1][32:]
+
+        tabless = table_content.split("!")
+        table_content = tabless[0] + tabless[1]
+
     else:
         table_content = "Keine Tabelle gefunden."
     return table_content
